@@ -1,0 +1,45 @@
+{
+  "name": "sudokublitz",
+  "version": "1.0.0",
+  "description": "A high-performance TypeScript Sudoku engine built for speed and precision.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "sudoku",
+    "solver",
+    "generator",
+    "typescript",
+    "webworker",
+    "high-performance",
+    "bitmask",
+    "sudokublitz"
+  ],
+  "author": "isalmi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isalmi/sudokublitz.git"
+  },
+  "bugs": {
+    "url": "https://github.com/isalmi/sudokublitz/issues"
+  },
+  "homepage": "https://github.com/isalmi/sudokublitz#readme",
+  "devDependencies": {
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.3.1"
+  }
+}

@@ -1,0 +1,19 @@
+# Dependencies
+node_modules
+.pnpm-debug.log*
+
+# Build
+dist
+
+# Tests
+coverage
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
