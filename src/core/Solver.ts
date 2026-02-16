@@ -77,7 +77,6 @@ function propagate(
   } while (changed);
 }
 
-
 /**
  * Solves a Sudoku board using backtracking search with the
  * Minimum Remaining Values (MRV) heuristic.

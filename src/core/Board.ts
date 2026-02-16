@@ -111,9 +111,9 @@ export class Board {
   set(i: number, d: number): void {
     const m = bit(d);
     const { row, col, bx } = decompose(i);
-    this.rowMask[row] ^= m;
-    this.colMask[col] ^= m;
-    this.boxMask[bx] ^= m;
+    this.rowMask[row] &= ~m;
+    this.colMask[col] &= ~m;
+    this.boxMask[bx] &= ~m;
     this.grid[i] = d;
   }
 
