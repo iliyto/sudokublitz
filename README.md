@@ -137,6 +137,32 @@ Generates a single puzzle string.
 
 ---
 
+### 🧵 Web Worker Usage
+
+For intensive generation tasks, **SudokuBlitz** includes a pre-bundled Web Worker to keep your UI responsive.
+
+```typescript
+// Example using Vite or other modern bundlers
+const worker = new Worker(
+  new URL('sudokublitz/workers/generation.worker.mjs', import.meta.url)
+);
+
+worker.onmessage = (e) => {
+  const { type, puzzles, percentage } = e.data;
+  if (type === 'progress') console.log(`Progress: ${percentage}%`);
+  if (type === 'complete') console.log('Done!', puzzles);
+};
+
+// Start generation
+worker.postMessage({ 
+  type: 'generate', 
+  count: 10, 
+  options: { difficulty: 'hard' } 
+});
+```
+
+---
+
 ### `Board` Methods
 - `constructor(str: string)`: Hex/Dot string to Board.
 - `candidates(index: number)`: Returns a bitmask of valid digits.
