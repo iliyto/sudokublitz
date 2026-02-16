@@ -5,11 +5,23 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "build": "tsup",
     "test": "vitest",
@@ -27,16 +39,16 @@
     "bitmask",
     "sudokublitz"
   ],
-  "author": "isalmi",
+  "author": "iliyto",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/isalmi/sudokublitz.git"
+    "url": "git+https://github.com/iliyto/sudokublitz.git"
   },
   "bugs": {
-    "url": "https://github.com/isalmi/sudokublitz/issues"
+    "url": "https://github.com/iliyto/sudokublitz/issues"
   },
-  "homepage": "https://github.com/isalmi/sudokublitz#readme",
+  "homepage": "https://github.com/iliyto/sudokublitz#readme",
   "devDependencies": {
     "eslint": "^9.0.0",
     "prettier": "^3.8.1",
