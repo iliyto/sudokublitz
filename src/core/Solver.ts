@@ -1,6 +1,6 @@
 // packages/sudokublitz/src/core/Solver.ts
 
-import { Board, bit, idx, GRID_SIZE, BOARD_DIM, BOX_DIM } from './Board';
+import { Board, bit, idx, GRID_SIZE, BOARD_DIM, BOX_DIM } from "./Board";
 
 /** Safety cap on solution count to prevent runaway searches */
 const DEFAULT_MAX_SOLUTIONS = 100_000;
@@ -38,19 +38,25 @@ function popcnt(x: number): number {
  * The cells placed by propagation are recorded in `placed` so they can be
  * undone later (e.g., when the caller needs a non-destructive operation).
  */
-function propagate(b: Board, placed: Array<{ index: number; digit: number }>): void {
+function propagate(
+  b: Board,
+  placed: Array<{ index: number; digit: number }>,
+): void {
   let changed: boolean;
   do {
     changed = false;
     for (let u = 0; u < BOARD_DIM; u++) {
-      const applyNakedSingle = (mask: number, cellFn: (i: number) => number) => {
+      const applyNakedSingle = (
+        mask: number,
+        cellFn: (i: number) => number,
+      ) => {
         if (popcnt(mask) !== 1) return;
 
         const d = 31 - Math.clz32(mask); // bit position (0-indexed)
         const digit = d + 1;
         for (let i = 0; i < BOARD_DIM; i++) {
           const cellIndex = cellFn(i);
-          if (!b.grid[cellIndex] && (b.candidates(cellIndex) & bit(digit))) {
+          if (!b.grid[cellIndex] && b.candidates(cellIndex) & bit(digit)) {
             b.set(cellIndex, digit);
             placed.push({ index: cellIndex, digit });
             changed = true;
@@ -65,19 +71,10 @@ function propagate(b: Board, placed: Array<{ index: number; digit: number }>): v
       const br = Math.floor(u / BOX_DIM) * BOX_DIM;
       const bc = (u % BOX_DIM) * BOX_DIM;
       applyNakedSingle(b.boxMask[u], (i) =>
-        idx(br + Math.floor(i / BOX_DIM), bc + (i % BOX_DIM))
+        idx(br + Math.floor(i / BOX_DIM), bc + (i % BOX_DIM)),
       );
     }
   } while (changed);
-}
-
-/**
- * Undoes all cell placements recorded in `placed` (in reverse order).
- */
-function undoPropagate(b: Board, placed: Array<{ index: number; digit: number }>): void {
-  for (let i = placed.length - 1; i >= 0; i--) {
-    b.unset(placed[i].index, placed[i].digit);
-  }
 }
 
 /**

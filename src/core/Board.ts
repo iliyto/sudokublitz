@@ -57,7 +57,7 @@ export class Board {
   constructor(str: string) {
     if (str.length < GRID_SIZE) {
       throw new Error(
-        `Invalid puzzle string: expected at least ${GRID_SIZE} characters, got ${str.length}`
+        `Invalid puzzle string: expected at least ${GRID_SIZE} characters, got ${str.length}`,
       );
     }
 
@@ -70,7 +70,9 @@ export class Board {
       const d = parseInt(str[i], 10);
       if (!isNaN(d) && d >= 1 && d <= 9) {
         if (!this.canPlace(i, d)) {
-          throw new Error(`Invalid puzzle: conflict at position ${i} (value: ${d})`);
+          throw new Error(
+            `Invalid puzzle: conflict at position ${i} (value: ${d})`,
+          );
         }
         this.set(i, d);
       }
@@ -109,9 +111,9 @@ export class Board {
   set(i: number, d: number): void {
     const m = bit(d);
     const { row, col, bx } = decompose(i);
-    this.rowMask[row] ^= m;
-    this.colMask[col] ^= m;
-    this.boxMask[bx] ^= m;
+    this.rowMask[row] &= ~m;
+    this.colMask[col] &= ~m;
+    this.boxMask[bx] &= ~m;
     this.grid[i] = d;
   }
 
@@ -159,10 +161,10 @@ export class Board {
   toString(): string {
     return Array.from(this.grid)
       .map((v, i) => {
-        const char = v || '.';
-        return i % BOARD_DIM === BOARD_DIM - 1 ? char + '\n' : String(char);
+        const char = v || ".";
+        return i % BOARD_DIM === BOARD_DIM - 1 ? char + "\n" : String(char);
       })
-      .join('');
+      .join("");
   }
 
   /**
@@ -170,7 +172,7 @@ export class Board {
    */
   export(): string {
     return Array.from(this.grid)
-      .map((v) => (v ? String(v) : '.'))
-      .join('');
+      .map((v) => (v ? String(v) : "."))
+      .join("");
   }
 }

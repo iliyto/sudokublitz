@@ -1,20 +1,24 @@
-// packages/sudokublitz/src/types/worker-messages.ts
+// src/types/worker-messages.ts
+
+/** Supported difficulty levels for puzzle generation */
+export type Difficulty = "easy" | "medium" | "hard";
 
 /** Options passed to the puzzle generation worker */
 export interface GenerationOptions {
-  // Currently unused — reserved for future configuration (e.g., difficulty, symmetry)
+  /** Target difficulty level (default: 'medium') */
+  difficulty?: Difficulty;
 }
 
 // --- Incoming messages (main thread → worker) ---
 
 export interface GenerateMessage {
-  type: 'generate';
+  type: "generate";
   count: number;
   options?: GenerationOptions;
 }
 
 export interface CancelMessage {
-  type: 'cancel';
+  type: "cancel";
 }
 
 export type IncomingWorkerMessage = GenerateMessage | CancelMessage;
@@ -22,13 +26,13 @@ export type IncomingWorkerMessage = GenerateMessage | CancelMessage;
 // --- Outgoing messages (worker → main thread) ---
 
 export interface StartedMessage {
-  type: 'started';
+  type: "started";
   count: number;
   timestamp: number;
 }
 
 export interface ProgressMessage {
-  type: 'progress';
+  type: "progress";
   current: number;
   total: number;
   percentage: number;
@@ -39,7 +43,7 @@ export interface ProgressMessage {
 }
 
 export interface CompleteMessage {
-  type: 'complete';
+  type: "complete";
   puzzles: string[];
   count: number;
   totalTime: number;
@@ -47,13 +51,13 @@ export interface CompleteMessage {
 }
 
 export interface CancelledMessage {
-  type: 'cancelled';
+  type: "cancelled";
   completed: number;
   puzzles: string[];
 }
 
 export interface ErrorMessage {
-  type: 'error';
+  type: "error";
   message: string;
   filename?: string;
   lineno?: number;

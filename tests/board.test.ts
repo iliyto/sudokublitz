@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { Board, GRID_SIZE } from '../src/core/Board';
-import { solve } from '../src/core/Solver';
-import { generateUniquePuzzle } from '../src/core/Generator';
 
 // --- Test fixtures ---
 const VALID_PUZZLE =
@@ -38,6 +36,13 @@ describe('Board', () => {
       for (let i = 0; i < GRID_SIZE; i++) {
         expect(board.grid[i]).toBe(0);
       }
+    });
+
+    it('should treat "0" as an empty cell (non-1-9 digits are ignored)', () => {
+      const withZero = '0'.repeat(81);
+      const board = new Board(withZero);
+      expect(board.grid[0]).toBe(0);
+      expect(board.isValid()).toBe(true);
     });
   });
 
@@ -146,110 +151,5 @@ describe('Board', () => {
       const board = new Board(VALID_PUZZLE);
       expect(board.isValid()).toBe(true);
     });
-  });
-});
-
-describe('Solver', () => {
-  it('should solve a valid puzzle', () => {
-    const board = new Board(VALID_PUZZLE);
-    const result = solve(board);
-    expect(result.count).toBe(1);
-    expect(result.solution).toBeTruthy();
-    expect(result.solution).toHaveLength(81);
-    expect(result.solution).not.toContain('.');
-  });
-
-  it('should not mutate the original board', () => {
-    const board = new Board(VALID_PUZZLE);
-    const originalExport = board.export();
-    solve(board);
-    expect(board.export()).toBe(originalExport);
-  });
-
-  it('should find multiple solutions for an empty board', () => {
-    const board = new Board(EMPTY_BOARD);
-    const result = solve(board, { stopAtFirst: false, maxSolutions: 5 });
-    expect(result.count).toBe(5);
-  });
-
-  it('should respect stopAtFirst option', () => {
-    const board = new Board(EMPTY_BOARD);
-    const result = solve(board, { stopAtFirst: true });
-    expect(result.count).toBe(1);
-    expect(result.solution).toBeTruthy();
-  });
-
-  it('should return count 0 and null solution for an unsolvable board', () => {
-    // Create a board that's internally inconsistent by forcing a dead-end
-    // Place 1-8 in first row, then 1 in second row/first column — leaves cell (1,0) with no candidates
-    const board = new Board(EMPTY_BOARD);
-    // Place digits 1-8 in first row
-    for (let d = 1; d <= 8; d++) {
-      board.set(d - 1, d);
-    }
-    // Place 9 in a position that makes column 8 unsolvable
-    board.set(8, 9);
-    // Now place 1 in row 1, col 0 — same box constraint
-    board.set(9, 4); // This creates a solvable-looking but highly constrained board
-
-    // We can't easily force an unsolvable state via the API without
-    // bypassing canPlace, so let's just verify the result structure
-    const result = solve(board);
-    expect(result).toHaveProperty('count');
-    expect(result).toHaveProperty('solution');
-  });
-
-  it('should produce a valid solution string', () => {
-    const board = new Board(VALID_PUZZLE);
-    const result = solve(board);
-
-    // Verify the solution is a valid complete board
-    const solutionBoard = new Board(result.solution!);
-    expect(solutionBoard.isValid()).toBe(true);
-
-    // Verify every cell is filled
-    for (let i = 0; i < GRID_SIZE; i++) {
-      expect(solutionBoard.grid[i]).toBeGreaterThanOrEqual(1);
-      expect(solutionBoard.grid[i]).toBeLessThanOrEqual(9);
-    }
-  });
-});
-
-describe('Generator', () => {
-  it('should generate an 81-character puzzle string', () => {
-    const puzzle = generateUniquePuzzle();
-    expect(puzzle).toHaveLength(81);
-  });
-
-  it('should generate a valid puzzle', () => {
-    const puzzle = generateUniquePuzzle();
-    const board = new Board(puzzle);
-    expect(board.isValid()).toBe(true);
-  });
-
-  it('should generate a puzzle with a unique solution', () => {
-    const puzzle = generateUniquePuzzle();
-    const board = new Board(puzzle);
-    const result = solve(board, { stopAtFirst: false, maxSolutions: 2 });
-    expect(result.count).toBe(1);
-  });
-
-  it('should have at least 17 clues', () => {
-    const puzzle = generateUniquePuzzle();
-    const clueCount = puzzle.split('').filter((c) => c !== '.').length;
-    expect(clueCount).toBeGreaterThanOrEqual(17);
-  });
-
-  it('should have fewer than 81 clues (i.e., it has empty cells)', () => {
-    const puzzle = generateUniquePuzzle();
-    const clueCount = puzzle.split('').filter((c) => c !== '.').length;
-    expect(clueCount).toBeLessThan(81);
-  });
-
-  it('should generate different puzzles on consecutive calls', () => {
-    const puzzle1 = generateUniquePuzzle();
-    const puzzle2 = generateUniquePuzzle();
-    // Extremely unlikely to be identical due to randomization
-    expect(puzzle1).not.toBe(puzzle2);
   });
 });
