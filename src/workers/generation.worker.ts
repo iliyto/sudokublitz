@@ -1,11 +1,11 @@
-// packages/sudokublitz/src/workers/generation.worker.ts
+// src/workers/generation.worker.ts
 
-import { generateUniquePuzzle } from '../core/Generator';
+import { generateUniquePuzzle } from "../core/Generator";
 import type {
   IncomingWorkerMessage,
   GenerationOptions,
   OutgoingWorkerMessage,
-} from '../types/worker-messages';
+} from "../types/worker-messages";
 
 /** Progress report interval (every N puzzles) */
 const PROGRESS_INTERVAL = 5;
@@ -35,21 +35,25 @@ function getErrorMessage(err: unknown): string {
 self.onmessage = function (e: MessageEvent<IncomingWorkerMessage>) {
   const { type } = e.data;
 
-  if (type === 'generate') {
+  if (type === "generate") {
     const { count, options } = e.data;
     generatePuzzlesInWorker(count, options ?? {});
-  } else if (type === 'cancel') {
+  } else if (type === "cancel") {
     cancelled = true;
   }
 };
 
-function generatePuzzlesInWorker(count: number, _options: GenerationOptions): void {
+function generatePuzzlesInWorker(
+  count: number,
+  options: GenerationOptions,
+): void {
   const startTime = Date.now();
   const puzzles: string[] = [];
+  const difficulty = options.difficulty ?? "medium";
   cancelled = false;
 
   postTypedMessage({
-    type: 'started',
+    type: "started",
     count,
     timestamp: startTime,
   });
@@ -57,7 +61,7 @@ function generatePuzzlesInWorker(count: number, _options: GenerationOptions): vo
   for (let i = 0; i < count; i++) {
     if (cancelled) {
       postTypedMessage({
-        type: 'cancelled',
+        type: "cancelled",
         completed: i,
         puzzles: [...puzzles],
       });
@@ -65,24 +69,25 @@ function generatePuzzlesInWorker(count: number, _options: GenerationOptions): vo
     }
 
     try {
-      const puzzle = generateUniquePuzzle();
+      const puzzle = generateUniquePuzzle(difficulty);
       puzzles.push(puzzle);
 
       // Send progress at regular intervals and on the final puzzle
       if (i % PROGRESS_INTERVAL === 0 || i === count - 1) {
         const elapsed = Date.now() - startTime;
-        const rate = ((i + 1) / elapsed) * 1000; // puzzles per second
+        const safeElapsed = elapsed > 0 ? elapsed : 1; // Prevent division by zero
+        const rate = ((i + 1) / safeElapsed) * 1000; // puzzles per second
         const estimated = count > 1 ? Math.round((count - i - 1) / rate) : 0;
 
         postTypedMessage({
-          type: 'progress',
+          type: "progress",
           current: i + 1,
           total: count,
           percentage: Math.round(((i + 1) / count) * 100),
           elapsed,
           estimatedRemaining: estimated,
           rate: rate.toFixed(2),
-          latestPuzzle: puzzle.substring(0, PUZZLE_PREVIEW_LENGTH) + '...',
+          latestPuzzle: puzzle.substring(0, PUZZLE_PREVIEW_LENGTH) + "...",
         });
       }
     } catch (error: unknown) {
@@ -90,12 +95,12 @@ function generatePuzzlesInWorker(count: number, _options: GenerationOptions): vo
       const originalMessage = getErrorMessage(error);
 
       try {
-        const puzzle = generateUniquePuzzle();
+        const puzzle = generateUniquePuzzle(difficulty);
         puzzles.push(puzzle);
       } catch (retryError: unknown) {
         // Skip this puzzle and continue with the rest
         postTypedMessage({
-          type: 'error',
+          type: "error",
           message: `Failed to generate puzzle ${i + 1} (original: ${originalMessage}, retry: ${getErrorMessage(retryError)})`,
           continuing: true,
         });
@@ -108,7 +113,7 @@ function generatePuzzlesInWorker(count: number, _options: GenerationOptions): vo
   const averageTime = puzzles.length > 0 ? totalTime / puzzles.length : 0;
 
   postTypedMessage({
-    type: 'complete',
+    type: "complete",
     puzzles,
     count: puzzles.length,
     totalTime,
@@ -117,11 +122,11 @@ function generatePuzzlesInWorker(count: number, _options: GenerationOptions): vo
 }
 
 // Handle unhandled worker errors
-self.addEventListener('error', (event) => {
+self.addEventListener("error", (event) => {
   const errorEvent = event as ErrorEvent;
   postTypedMessage({
-    type: 'error',
-    message: errorEvent.message || 'Unknown worker error',
+    type: "error",
+    message: errorEvent.message || "Unknown worker error",
     filename: errorEvent.filename,
     lineno: errorEvent.lineno,
   });

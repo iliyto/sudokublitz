@@ -51,6 +51,22 @@ const newPuzzle = generateUniquePuzzle();
 console.log('Generated:', newPuzzle);
 ```
 
+### Batch Generation with Progress
+
+For generating multiple puzzles without blocking the UI (on the main thread via yielding), use `generatePuzzles`:
+
+```typescript
+import { generatePuzzles } from 'sudokublitz';
+
+const { puzzles, totalTime } = await generatePuzzles({
+  count: 5,
+  difficulty: 'hard',
+  onProgress: (p) => console.log(`Generated ${p.current}/${p.total} (${p.percent}%)`),
+});
+
+console.log(`Generated ${puzzles.length} puzzles in ${totalTime}ms`);
+```
+
 ### Using the Worker
 
 The package includes a Web Worker for background puzzle generation.
@@ -91,6 +107,11 @@ Solves the given board instance.
 
 ### `generateUniquePuzzle()`
 Generates a new, valid Sudoku puzzle string with a unique solution.
+
+### `generatePuzzles(options)`
+Generates multiple puzzles with progress tracking.
+- `options`: `{ count, difficulty, onProgress }`.
+- Returns a Promise resolving to `{ puzzles, totalTime, averageTime }`.
 
 ## 📄 License
 
